@@ -1,0 +1,19 @@
+{
+  "name": "contentfs",
+  "version": "1.0.0",
+  "description": "A filesystem is a tree of names that correspond to points of data.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "tap test/test-*.js"
+  },
+  "keywords": [],
+  "author": "Mikeal Rogers <mikeal.rogers@gmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "rimraf": "^2.6.1",
+    "tap": "^10.7.0"
+  }
+}
