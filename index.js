@@ -65,7 +65,7 @@ class ContentFS {
     return value
   }
   async ls (path) {
-    let value = this._ls(path)
+    let value = await this._ls(path)
     return Object.keys(value)
   }
   setRoot (root) {

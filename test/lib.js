@@ -29,6 +29,13 @@ module.exports.push((name, createLocal, createRemote) => {
     t.equals(newroot, store._root)
   })
 
+  test(`${name}: basic ls.`, async t => {
+    t.plan(1)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let files = await store.ls('/_deepTree')
+    t.same([ '_1', 'test.txt' ], files)
+  })
+
   test(`${name}: transaction error updating root.`, async t => {
     t.plan(1)
     let store = await contentfs.from(__dirname, createLocal(), createRemote())
