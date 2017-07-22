@@ -20,6 +20,8 @@
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "husky": "^0.14.3",
+    "require-nocache": "^1.0.0",
+    "require-uncached": "^1.0.3",
     "rimraf": "^2.6.1",
     "standard": "^10.0.2",
     "tap": "^10.7.0",

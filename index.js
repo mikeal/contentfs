@@ -148,6 +148,11 @@ class ContentFS {
     return [...hashes]
   }
   async push (useBuffers = true) {
+    // TODO: smarter sync on push.
+    // The current scheme parses the whole tree and pushes everything.
+    // A smarter scheme would be to open the remote tree along with
+    // the local tree and not extend through the tree where there are
+    // no changes.
     let root = this._root
     let hashes = await this.activeHashes()
     for (let hash of hashes) {
