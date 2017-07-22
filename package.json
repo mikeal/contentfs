@@ -1,7 +1,7 @@
 {
   "name": "contentfs",
   "version": "1.0.0",
-  "description": "A filesystem is a tree of names that correspond to points of data.",
+  "description": "A filesystem style tree on top of content-addressable data storage.",
   "main": "index.js",
   "directories": {
     "test": "test"
