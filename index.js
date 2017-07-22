@@ -37,7 +37,7 @@ class ContentFS {
   }
   async _getRoot (store) {
     if (!this._root) throw new Error('Root has not been set.')
-    return await this.__get(this._root)
+    return this.__get(this._root)
   }
   async __get (hash) {
     let value
