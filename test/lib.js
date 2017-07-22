@@ -85,4 +85,16 @@ module.exports.push((name, createLocal, createRemote) => {
       t.same(await store._getLocal(hash), await store._getRemote(hash))
     }
   })
+
+  test(`${name}: concurrent updates during activeHashes`, async t => {
+    t.plan(2)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let root = await store.set('/testfile.txt', Buffer.from('asdfasff'))
+    let _promise = store.activeHashes()
+    store.set('/anotherfile.txt', Buffer.from('asdfasdfafasdfasdff'))
+    let hashes = await _promise
+    t.notsame(root, store._root)
+    let hash = root.slice(0, root.indexOf('.'))
+    t.ok(hashes.indexOf(hash) === -1)
+  })
 })
