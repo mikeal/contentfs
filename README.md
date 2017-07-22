@@ -20,3 +20,15 @@ map on top of all sorts of underlying storage systems (inmemory, fs, S3, IndexDB
 blockchain, etc). The only catch is that the hashing system must be consistent
 between the two implementations (many implementations allow their hashing to be
 configured).
+
+```javascript
+let inmem = require('lucass/inmemory')
+let localstore = inmem()
+let remotestore = inmem()
+let store = await contentfs.from(__dirname, localstore, remotestore)
+await store.set('/filename.txt', Buffer.from('asdf'))
+// local store has its tree updated and content stored, remote does not.
+let [rootNode, hashes] = await store.push()
+// remote was pushed `hashes`
+await setRemoteRootNode(rootNode) // tell remote storage to move to the new root node
+```
