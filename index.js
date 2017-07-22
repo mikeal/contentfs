@@ -1,18 +1,5 @@
 const promisify = require('util').promisify
 
-const isDirParsed = dirMap => {
-  for (let key of dirMap.keys()) {
-    let value = dirMap.get(key)
-    if (typeof value === 'string' && value.endsWith('.dir')) {
-      return false
-    } else if (typeof value === 'object') {
-      if (!isDirParsed(value)) return false
-    } else if (typeof value !== 'string') {
-      throw new Error('Directory contains unknown types.')
-    }
-  }
-}
-
 const propPromise = (inst, prop) => {
   if (!inst[prop]) throw new Error(`Missing property: ${prop}`)
   return promisify((...args) => inst[prop](...args))
@@ -70,7 +57,7 @@ class ContentFS {
       value = await this.__get(path)
     }
     if (Buffer.isBuffer(value)) return value
-    throw new Error('Not Found')
+    throw new Error('Not Found: path')
   }
   async _ls (path) {
     let value = await this._get(path)
@@ -135,8 +122,8 @@ class ContentFS {
       let value = tree[key]
       if (value.endsWith('.dir')) {
         dirs.push(value)
-        let [tree, _dirs] = await this._openTree(this.__get(value))
-        tree[key] = tree
+        let [_tree, _dirs] = await this._openTree(await this.__get(value))
+        tree[key] = _tree
         dirs = dirs.concat(_dirs)
       }
     }
@@ -164,7 +151,7 @@ class ContentFS {
     let root = this._root
     let hashes = await this.activeHashes()
     for (let hash of hashes) {
-      let value = await this.getBuffer(hash)
+      let value = await this._getLocal(hash)
       let rhash = await this._setRemote(value)
       if (hash !== rhash) throw new Error('Remote hash does not match local hash.')
     }

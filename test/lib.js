@@ -14,7 +14,7 @@ module.exports.push((name, createLocal, createRemote) => {
     let f = `/${path.basename(__filename)}`
     let one = await store.getBuffer(f)
     let two = await readFile(__filename)
-    t.deepEqual(one, two)
+    t.same(one, two)
   })
 
   test(`${name}: basic set.`, async t => {
@@ -24,8 +24,8 @@ module.exports.push((name, createLocal, createRemote) => {
     let oldroot = store._root
     let newfile = Buffer.from('asdfasdf')
     let newroot = await store.set(f, newfile)
-    t.deepEqual(await store.getBuffer(f), newfile)
-    t.notEquals(oldroot, newroot)
+    t.same(await store.getBuffer(f), newfile)
+    t.notsame(oldroot, newroot)
     t.equals(newroot, store._root)
   })
 
@@ -53,7 +53,7 @@ module.exports.push((name, createLocal, createRemote) => {
     let filehash = await set(file)
     let root = await store.set('/testfile', file)
     let hashes = await store.activeHashes()
-    t.deepEquals([root.slice(0, root.indexOf('.')), filehash], hashes)
+    t.same([root.slice(0, root.indexOf('.')), filehash], hashes)
   })
 
   test(`${name}: get from remote`, async t => {
@@ -64,18 +64,18 @@ module.exports.push((name, createLocal, createRemote) => {
     store.setRoot(root)
     let buffer = await store.getBuffer(`/${path.basename(__filename)}`)
     let compare = await util.promisify(fs.readFile)(__filename)
-    t.deepEqual(buffer, compare)
+    t.same(buffer, compare)
   })
 
   test(`${name}: push to remote`, async t => {
     let store = await contentfs.from(__dirname, createLocal(), createRemote())
-    let pushed = await store.activeHashes()
+    let expected = await store.activeHashes()
     let [root, hashes] = await store.push()
-    t.plan(pushed.length + 2)
+    t.plan(expected.length + 2)
     t.ok(root)
-    t.deepEqual(pushed, hashes)
-    for (let hash of pushed) {
-      t.equal(await store._getLocal(hash), await store._getRemote(hash))
+    t.same(expected, hashes)
+    for (let hash of expected) {
+      t.same(await store._getLocal(hash), await store._getRemote(hash))
     }
   })
 })
