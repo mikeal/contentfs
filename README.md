@@ -1,5 +1,7 @@
 # contentfs (Content Addressable Filesystem)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/mikeal/contentfs.svg)](https://greenkeeper.io/)
+
 A filesystem is a tree of names that correspond to points of data.
 
 Content addressablility is when content is referred to by a consistent
