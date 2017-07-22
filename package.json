@@ -8,7 +8,10 @@
   },
   "scripts": {
     "commit": "git-cz",
-    "test": "tap test/test-*.js && standard"
+    "test": "tap test/test-*.js && standard",
+    "precommit": "npm test",
+    "prepush": "npm test",
+    "commitmsg": "validate-commit-msg"
   },
   "keywords": [],
   "author": "Mikeal Rogers <mikeal.rogers@gmail.com>",
@@ -16,9 +19,11 @@
   "devDependencies": {
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
+    "husky": "^0.14.3",
     "rimraf": "^2.6.1",
     "standard": "^10.0.2",
-    "tap": "^10.7.0"
+    "tap": "^10.7.0",
+    "validate-commit-msg": "^2.13.0"
   },
   "dependencies": {
     "lucass": "^1.1.2"
