@@ -112,13 +112,54 @@ class ContentFS {
     return await this._setLocal(Buffer.from(JSON.stringify(dir))) + '.dir'
   }
   async set (key, value) {
+    if (this._pending) {
+      return this._queue(key, value)
+    } else {
+      return this.setMulti([[key, value]])
+    }
+  }
+  async _queue (key, value) {
+    let all
+    if (!Array.isArray(key)) {
+      all = [[key, value]]
+    } else {
+      all = key
+    }
+    let promises = Promise.all(all.map(tuple => {
+      return new Promise(resolve => {
+        tuple.push(resolve)
+      })
+    }))
+    this._pending = this._pending.concat(all)
+    return promises
+  }
+  _drain () {
+    let all = this._pending
+    this._pending = null
+    if (all.length) this.setMulti(all)
+  }
+  async setMulti (all) {
+    if (this._pending) {
+      return this._queue(all)
+    }
+    this._pending = []
     let current = this._root
-    let dir = await this._set(key, value)
-    let root = await this._hashDirectory(dir)
+    let dir = null
+    let resolves = []
+    while (all.length) {
+      let [key, value, resolve] = all.shift()
+      dir = await this._set(key, value, dir)
+      if (resolve) resolves.push(resolve)
+    }
     if (this._root !== current) {
       throw new Error('Conflict error, root updated concurrently')
     }
+    let root = await this._hashDirectory(dir)
     this.setRoot(root)
+    resolves.forEach(resolve => resolve(root))
+    process.nextTick(() => {
+      this._drain()
+    })
     return root
   }
   // TODO: setMulti

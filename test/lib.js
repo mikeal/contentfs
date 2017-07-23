@@ -48,19 +48,6 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same([ '_1', 'test.txt' ], files)
   })
 
-  test(`${name}: transaction error updating root.`, async t => {
-    t.plan(1)
-    let store = await contentfs.from(__dirname, createLocal(), createRemote())
-    let f = `/${path.basename(__filename)}`
-    let newfile = Buffer.from('asdfasdf')
-    store.set(f, newfile)
-    try {
-      await store.set(f, newfile)
-    } catch (e) {
-      t.type(e, 'Error')
-    }
-  })
-
   test(`${name}: active hashes.`, async t => {
     t.plan(1)
     let local = createLocal()
@@ -96,18 +83,6 @@ module.exports.push((name, createLocal, createRemote) => {
     for (let hash of expected) {
       t.same(await store._getLocal(hash), await store._getRemote(hash))
     }
-  })
-
-  test(`${name}: concurrent updates during activeHashes`, async t => {
-    t.plan(2)
-    let store = await contentfs.from(__dirname, createLocal(), createRemote())
-    let root = await store.set('/testfile.txt', Buffer.from('asdfasff'))
-    let _promise = store.activeHashes()
-    store.set('/anotherfile.txt', Buffer.from('asdfasdfafasdfasdff'))
-    let hashes = await _promise
-    t.notsame(root, store._root)
-    let hash = root.slice(0, root.indexOf('.'))
-    t.ok(hashes.indexOf(hash) === -1)
   })
 
   test(`${name}: deep get`, async t => {
