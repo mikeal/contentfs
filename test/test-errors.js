@@ -77,9 +77,9 @@ test(`errors: ls a file`, async t => {
   t.plan(2)
   let store = await contentfs.from(__dirname, inmem(), inmem())
   try {
-    await store.ls('/test.txt')
+    await store.ls('/lib.js')
   } catch (e) {
-    t.same(e.message, `Not found.`)
+    t.same(e.message, `Not Directory.`)
     t.type(e, 'Error')
   }
 })

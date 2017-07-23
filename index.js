@@ -101,7 +101,9 @@ class ContentFS {
         _dir = _dir[p]
       }
     }
-    return dir
+    /* Guard against while loop internal error, can't be tested */
+    /* istanbul ignore next */
+    throw new Error('Loop logic error, interals issue: please log issue.')
   }
   async _hashDirectory (dir) {
     for (let key in dir) {
@@ -151,10 +153,10 @@ class ContentFS {
       dir = await this._set(key, value, dir)
       if (resolve) resolves.push(resolve)
     }
-    if (this._root !== current) {
-      /* This is a guard against internals failing or being overwritten.
+    /* This is a guard against internals failing or being overwritten.
          Can't be tested because the timing for an attack can't be predicted.
-      /* istanbul ignore next */
+    /* istanbul ignore if */
+    if (this._root !== current) {
       throw new Error('Conflict error, root updated concurrently')
     }
     let root = await this._hashDirectory(dir)

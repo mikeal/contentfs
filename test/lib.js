@@ -111,7 +111,7 @@ module.exports.push((name, createLocal, createRemote) => {
   })
 
   test(`${name}: setMulti()`, async t => {
-    t.plan(3)
+    t.plan(5)
     let store = await contentfs.from(__dirname, createLocal(), createRemote())
     let buff = Buffer.from('setMulti-test')
     let p1 = store.setMulti([['/_deepTree/setmulti.txt', buff], ['/setmulti.txt', buff]])
@@ -121,5 +121,23 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same(await store.getBuffer('/setmulti.txt'), buff)
     await p2
     t.same(await store.getBuffer('/concurrent.txt'), buff)
+    await store.setMulti([['/_deepTree/1.txt', buff], ['/_deepTree/2.txt', buff]])
+    t.same(await store.getBuffer('/_deepTree/1.txt'), buff)
+    t.same(await store.getBuffer('/_deepTree/2.txt'), buff)
+  })
+
+  test(`${name}: overwrite file as dir`, async t => {
+    t.plan(4)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let buff = Buffer.from('overwrite')
+    await store.set('/test-fs.js/overwrite.txt', buff)
+    t.same(await store.getBuffer('/test-fs.js/overwrite.txt'), buff)
+    t.same(await store.ls('/test-fs.js/'), ['overwrite.txt'])
+    try {
+      await store.getBuffer('/test-fs.js')
+    } catch (e) {
+      t.same(e.message, 'Not Found: /test-fs.js')
+      t.type(e, 'Error')
+    }
   })
 })
