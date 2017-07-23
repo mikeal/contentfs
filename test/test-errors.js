@@ -23,3 +23,13 @@ test(`errors: test browser exemptions`, t => {
   t.notok(_contentfs.walk)
   t.notok(_contentfs.from)
 })
+
+test(`errors: get invalid path`, async t => {
+  t.plan(1)
+  let store = await contentfs.from(__dirname, inmem(), inmem())
+  try {
+    await store.get('/not/there.txt')
+  } catch (e) {
+    t.type(e, 'Error')
+  }
+})

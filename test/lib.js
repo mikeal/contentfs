@@ -7,6 +7,10 @@ const readFile = util.promisify(fs.readFile)
 
 module.exports = []
 
+const diff = (a, b) => {
+  return new Set([...a].filter(x => !b.has(x)))
+}
+
 module.exports.push((name, createLocal, createRemote) => {
   test(`${name}: basic init.`, async t => {
     t.plan(1)
@@ -104,5 +108,28 @@ module.exports.push((name, createLocal, createRemote) => {
     t.notsame(root, store._root)
     let hash = root.slice(0, root.indexOf('.'))
     t.ok(hashes.indexOf(hash) === -1)
+  })
+
+  test(`${name}: deep get`, async t => {
+    t.plan(1)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let buffer = await store.getBuffer('/_deepTree/_1/_2/test.txt')
+    t.same(buffer, Buffer.from('test'))
+  })
+
+  test(`${name}: deep set`, async t => {
+    t.plan(5)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let original = new Set(await store.activeHashes())
+    await store.set('/_deepTree/test.txt', Buffer.from('new-text'))
+    let buffer = await store.getBuffer('/_deepTree/test.txt')
+    t.same(buffer, Buffer.from('new-text'))
+    let overwritten = new Set(await store.activeHashes())
+    t.same(diff(original, overwritten).size, 2)
+    await store.set('/_deepTree/_1/_2/3/4/test.text', Buffer.from('new-text'))
+    let deepwrite = new Set(await store.activeHashes())
+    t.same(diff(overwritten, deepwrite).size, 4)
+    t.same(await store.ls('/_deepTree/_1/_2/3'), ['4'])
+    t.same(await store.ls('/_deepTree/_1/_2/3/4'), ['test.text'])
   })
 })

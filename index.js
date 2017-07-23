@@ -94,7 +94,14 @@ class ContentFS {
         } else {
           // This was a file and is being overwritten as a directory.
           _dir[p] = {}
+        }
+        _dir = _dir[p]
+      } else if (typeof value === 'undefined') {
+        if (path.length) {
+          _dir[p] = {}
           _dir = _dir[p]
+        } else {
+          _dir[p] = await this.__get(hash)
         }
       }
     }
