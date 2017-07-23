@@ -73,7 +73,7 @@ class ContentFS {
     this._root = root
     return this
   }
-  async _set (key, value, dir = null) {
+  async _set (key, value, dir) {
     if (!key.startsWith('/')) throw new Error('Path is not valid.')
     let hash = await this._setLocal(value)
     if (!dir) dir = await this.__get(this._root)
