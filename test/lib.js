@@ -93,7 +93,7 @@ module.exports.push((name, createLocal, createRemote) => {
   })
 
   test(`${name}: deep set`, async t => {
-    t.plan(6)
+    t.plan(7)
     let store = await contentfs.from(__dirname, createLocal(), createRemote())
     let original = new Set(await store.activeHashes())
     await store.set('/_deepTree/test.txt', Buffer.from('new-text'))
@@ -107,7 +107,10 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same(diff(overwritten, deepwrite).size, 4)
     t.same(await store.ls('/_deepTree/_1/_2/3'), ['4'])
     t.same(await store.ls('/_deepTree/_1/_2/3/4'), ['test.text'])
-    // TODO: overwrite a directory with a file.
+
+    let b = Buffer.from('createdirs')
+    await store.set('/one/two/three/four/five/six.txt', b)
+    t.same(await store.getBuffer('/one/two/three/four/five/six.txt'), b)
   })
 
   test(`${name}: setMulti()`, async t => {

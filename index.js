@@ -153,8 +153,8 @@ class ContentFS {
       dir = await this._set(key, value, dir)
       if (resolve) resolves.push(resolve)
     }
-    /* This is a guard against internals failing or being overwritten.
-         Can't be tested because the timing for an attack can't be predicted.
+    // This is a guard against internals failing or being overwritten.
+    // Can't be tested because the timing for an attack can't be predicted.
     /* istanbul ignore if */
     if (this._root !== current) {
       throw new Error('Conflict error, root updated concurrently')
