@@ -8,7 +8,8 @@
   },
   "scripts": {
     "commit": "git-cz",
-    "test": "tap test/test-*.js && standard",
+    "test": "tap test/test-*.js --100 && standard",
+    "coverage": "tap test/test-*.js --coverage-report=lcov && codecov",
     "precommit": "npm test",
     "prepush": "npm test",
     "commitmsg": "validate-commit-msg"
@@ -17,6 +18,7 @@
   "author": "Mikeal Rogers <mikeal.rogers@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "codecov": "^2.2.0",
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "husky": "^0.14.3",
