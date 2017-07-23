@@ -17,6 +17,14 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same(one, two)
   })
 
+  test(`${name}: basic hash get`, async t => {
+    t.plan(1)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let buffer = await store.getBuffer(store._root.slice(0, store._root.indexOf('.')))
+    let obj = await store.__get(store._root)
+    t.same(obj, JSON.parse(buffer.toString()))
+  })
+
   test(`${name}: basic set.`, async t => {
     t.plan(3)
     let store = await contentfs.from(__dirname, createLocal(), createRemote())

@@ -112,7 +112,9 @@ class ContentFS {
     let current = this._root
     let dir = await this._set(key, value)
     let root = await this._hashDirectory(dir)
-    if (this._root !== current) throw new Error('Conflict error, root updated concurrently')
+    if (this._root !== current) {
+      throw new Error('Conflict error, root updated concurrently')
+    }
     this.setRoot(root)
     return root
   }
