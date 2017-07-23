@@ -1,5 +1,12 @@
 # contentfs (Content Addressable Filesystem)
 
+[![Coverage Status](https://coveralls.io/repos/github/mikeal/contentfs/badge.svg?branch=master)](https://coveralls.io/github/mikeal/contentfs?branch=master)
+[![Build Status](https://travis-ci.org/mikeal/contentfs.svg?branch=master)](https://travis-ci.org/mikeal/contentfs)
+[![dependencies Status](https://david-dm.org/mikeal/contentfs/status.svg)](https://david-dm.org/mikeal/contentfs)
+
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 A filesystem is a tree of names that correspond to points of data.
 
 Content addressablility is when content is referred to by a consistent

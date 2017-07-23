@@ -121,6 +121,7 @@ class ContentFS {
     this.setRoot(root)
     return root
   }
+  // TODO: setMulti
   async _openTree (tree) {
     let dirs = []
     for (let key in tree) {
