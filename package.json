@@ -1,6 +1,6 @@
 {
   "name": "contentfs",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "A filesystem style tree on top of content-addressable data storage.",
   "main": "index.js",
   "directories": {
@@ -12,7 +12,8 @@
     "coverage": "tap test/test-*.js --coverage-report=lcov && codecov",
     "precommit": "npm test",
     "prepush": "npm test",
-    "commitmsg": "validate-commit-msg"
+    "commitmsg": "validate-commit-msg",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "keywords": [],
   "author": "Mikeal Rogers <mikeal.rogers@gmail.com>",
@@ -27,7 +28,8 @@
     "rimraf": "^2.6.1",
     "standard": "^10.0.2",
     "tap": "^10.7.0",
-    "validate-commit-msg": "^2.13.0"
+    "validate-commit-msg": "^2.13.0",
+    "semantic-release": "^6.3.6"
   },
   "dependencies": {
     "lucass": "^1.1.2"
@@ -36,5 +38,9 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikeal/contentfs.git"
   }
 }
