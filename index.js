@@ -99,9 +99,13 @@ class ContentFS {
       } else if (typeof value === 'undefined') {
         _dir[p] = {}
         _dir = _dir[p]
+      } else {
+        // Guard against internal dir corruption, can't be tested */
+        /* istanbul ignore next */
+        throw new Error('Invalid type in dir tree.')
       }
     }
-    /* Guard against while loop internal error, can't be tested */
+    // Guard against while loop internal error, can't be tested */
     /* istanbul ignore next */
     throw new Error('Loop logic error, interals issue: please log issue.')
   }
