@@ -109,4 +109,17 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same(await store.ls('/_deepTree/_1/_2/3/4'), ['test.text'])
     // TODO: overwrite a directory with a file.
   })
+
+  test(`${name}: setMulti()`, async t => {
+    t.plan(3)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let buff = Buffer.from('setMulti-test')
+    let p1 = store.setMulti([['/_deepTree/setmulti.txt', buff], ['/setmulti.txt', buff]])
+    let p2 = store.setMulti([['/concurrent.txt', buff]])
+    await p1
+    t.same(await store.getBuffer('/_deepTree/setmulti.txt'), buff)
+    t.same(await store.getBuffer('/setmulti.txt'), buff)
+    await p2
+    t.same(await store.getBuffer('/concurrent.txt'), buff)
+  })
 })

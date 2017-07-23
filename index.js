@@ -152,6 +152,9 @@ class ContentFS {
       if (resolve) resolves.push(resolve)
     }
     if (this._root !== current) {
+      /* This is a guard against internals failing or being overwritten.
+         Can't be tested because the timing for an attack can't be predicted.
+      /* istanbul ignore next */
       throw new Error('Conflict error, root updated concurrently')
     }
     let root = await this._hashDirectory(dir)
@@ -162,7 +165,6 @@ class ContentFS {
     })
     return root
   }
-  // TODO: setMulti
   async _openTree (tree) {
     let dirs = []
     for (let key in tree) {
