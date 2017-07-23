@@ -57,7 +57,7 @@ class ContentFS {
       value = await this.__get(path)
     }
     if (Buffer.isBuffer(value)) return value
-    throw new Error('Not Found: path')
+    throw new Error(`Not Found: ${path}`)
   }
   async _ls (path) {
     let value = await this._get(path)
@@ -97,12 +97,8 @@ class ContentFS {
         }
         _dir = _dir[p]
       } else if (typeof value === 'undefined') {
-        if (path.length) {
-          _dir[p] = {}
-          _dir = _dir[p]
-        } else {
-          _dir[p] = await this.__get(hash)
-        }
+        _dir[p] = {}
+        _dir = _dir[p]
       }
     }
     return dir
@@ -174,6 +170,8 @@ class ContentFS {
 }
 
 module.exports = (local, remote, opts) => new ContentFS(local, remote, opts)
+
+module.exports._propromise = propPromise // For testing.
 
 if (!process.browser) {
   const fs = require('fs')

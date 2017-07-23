@@ -132,5 +132,6 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same(diff(overwritten, deepwrite).size, 4)
     t.same(await store.ls('/_deepTree/_1/_2/3'), ['4'])
     t.same(await store.ls('/_deepTree/_1/_2/3/4'), ['test.text'])
+    // TODO: overwrite a directory with a file.
   })
 })
