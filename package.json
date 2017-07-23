@@ -8,8 +8,10 @@
   },
   "scripts": {
     "commit": "git-cz",
-    "test": "tap test/test-*.js --100 && standard",
-    "coverage": "tap test/test-*.js --coverage-report=lcov && codecov",
+    "test": "tap test/test-*.js --100",
+    "posttest": "standard",
+    "coverage": "tap test/test-*.js --coverage-report=lcov",
+    "postcoverage": "codecov",
     "precommit": "npm test",
     "prepush": "npm test",
     "commitmsg": "validate-commit-msg",
