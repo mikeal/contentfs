@@ -96,6 +96,9 @@ class ContentFS {
           _dir[p] = {}
         }
         _dir = _dir[p]
+      // Once we hit this point it is never false so we need to ignore
+      // coverage of the falsey branch of the if.
+      /* istanbul ignore next */
       } else if (typeof value === 'undefined') {
         _dir[p] = {}
         _dir = _dir[p]
