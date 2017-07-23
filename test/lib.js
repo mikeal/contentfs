@@ -114,7 +114,7 @@ module.exports.push((name, createLocal, createRemote) => {
   })
 
   test(`${name}: setMulti()`, async t => {
-    t.plan(5)
+    t.plan(8)
     let store = await contentfs.from(__dirname, createLocal(), createRemote())
     let buff = Buffer.from('setMulti-test')
     let p1 = store.setMulti([['/_deepTree/setmulti.txt', buff], ['/setmulti.txt', buff]])
@@ -127,6 +127,15 @@ module.exports.push((name, createLocal, createRemote) => {
     await store.setMulti([['/_deepTree/1.txt', buff], ['/_deepTree/2.txt', buff]])
     t.same(await store.getBuffer('/_deepTree/1.txt'), buff)
     t.same(await store.getBuffer('/_deepTree/2.txt'), buff)
+
+    let b = Buffer.from('createdirs')
+    let all = [['/one/two/three/four/five/six.txt', b],
+               ['/one/two/three/four/five/seven.txt', b],
+               ['/one/two/three/eight.txt', b]]
+    await store.setMulti(all)
+    t.same(await store.getBuffer('/one/two/three/four/five/six.txt'), b)
+    t.same(await store.getBuffer('/one/two/three/four/five/seven.txt'), b)
+    t.same(await store.getBuffer('/one/two/three/eight.txt'), b)
   })
 
   test(`${name}: overwrite file as dir`, async t => {
