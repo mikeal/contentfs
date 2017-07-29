@@ -231,24 +231,31 @@ if (!process.browser) {
   const ls = promisify(fs.readdir)
   const stat = promisify(fs.stat)
   const readFile = promisify(fs.readFile)
-  const walk = async (dir, local) => {
+  const walk = async (dir, local, filter) => {
     let set = propPromise(local, 'set')
     let files = await ls(dir)
     let map = {}
     for (let file of files) {
       let fullpath = path.join(dir, file)
-      let stats = await stat(path.join(dir, file))
-      if (stats.isDirectory()) {
-        map[file] = await walk(fullpath, local)
-      } else {
-        map[file] = await set(await readFile(fullpath))
+      let passes = true
+      if (filter) {
+        passes = filter(fullpath)
+        if (passes && passes.then) passes = await passes
+      }
+      if (passes) {
+        let stats = await stat(path.join(dir, file))
+        if (stats.isDirectory()) {
+          map[file] = await walk(fullpath, local)
+        } else {
+          map[file] = await set(await readFile(fullpath))
+        }
       }
     }
     return await set(Buffer.from(JSON.stringify(map))) + '.dir'
   }
 
-  module.exports.from = async (directory, local, remote) => {
-    let root = await walk(directory, local)
+  module.exports.from = async (directory, local, remote, filter) => {
+    let root = await walk(directory, local, filter)
     return module.exports(local, remote).setRoot(root)
   }
   module.exports.walk = walk

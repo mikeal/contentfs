@@ -21,20 +21,19 @@
   "author": "Mikeal Rogers <mikeal.rogers@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "browserify": "^14.4.0",
     "codecov": "^2.2.0",
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "husky": "^0.14.3",
+    "lucass": "^3.0.0",
     "require-nocache": "^1.0.0",
     "require-uncached": "^1.0.3",
     "rimraf": "^2.6.1",
+    "semantic-release": "^6.3.6",
     "standard": "^10.0.2",
     "tap": "^10.7.0",
-    "validate-commit-msg": "^2.13.0",
-    "semantic-release": "^6.3.6"
-  },
-  "dependencies": {
-    "lucass": "^1.1.2"
+    "validate-commit-msg": "^2.13.0"
   },
   "config": {
     "commitizen": {
@@ -44,5 +43,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/mikeal/contentfs.git"
+  },
+  "browser": {
+    "fs": false,
+    "path": false
   }
 }

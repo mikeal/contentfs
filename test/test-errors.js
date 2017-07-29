@@ -1,16 +1,21 @@
 const inmem = require('lucass/inmemory')
 const test = require('tap').test
 const contentfs = require('../')
+const through = require('through2')
 const nocache = require('require-uncached')
 
 test(`errors: hash mismatch`, async t => {
-  t.plan(1)
+  t.plan(2)
+  let createHasher = (cb) => {
+    return through(() => setTimeout(() => cb(null, 'asdf'), 100))
+  }
   let local = inmem()
-  let remote = inmem('sha1')
+  let remote = inmem(createHasher)
   let store = await contentfs.from(__dirname, local, remote)
   try {
     await store.push()
   } catch (e) {
+    t.same(e.message, 'Remote hash does not match local hash.')
     t.type(e, 'Error')
   }
 })
