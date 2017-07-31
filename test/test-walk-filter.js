@@ -11,7 +11,7 @@ test(`filter: normal function filter`, async t => {
   let files = await store.ls('/')
   t.same(['_deepTree'], files)
   let hashes = await store.activeHashes()
-  t.same(hashes.length, 5)
+  t.same(hashes.length, 2)
 })
 
 test(`filter: async function filter`, async t => {
@@ -23,5 +23,5 @@ test(`filter: async function filter`, async t => {
   let files = await store.ls('/')
   t.same(['_deepTree'], files)
   let hashes = await store.activeHashes()
-  t.same(hashes.length, 5)
+  t.same(hashes.length, 2)
 })

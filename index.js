@@ -245,7 +245,7 @@ if (!process.browser) {
       if (passes) {
         let stats = await stat(path.join(dir, file))
         if (stats.isDirectory()) {
-          map[file] = await walk(fullpath, local)
+          map[file] = await walk(fullpath, local, filter)
         } else {
           map[file] = await set(await readFile(fullpath))
         }
