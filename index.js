@@ -63,8 +63,11 @@ class AbstractContentFS {
     if (!key.startsWith('/')) throw new Error('Path is not valid.')
     let hash = await this.local.set(value)
 
-    let _root = await this.getRoot()
-    if (!dir) dir = await this.__get(_root)
+    if (!dir) {
+      let _root = await this.getRoot()
+      if (_root) dir = await this.__get(_root)
+      else dir = {}
+    }
 
     let path = key.split('/').filter(x => x)
     let _dir = dir
@@ -176,9 +179,9 @@ class AbstractContentFS {
     }
     return [tree, dirs]
   }
-  async activeHashes (root) {
-    let current = root || await this.getRoot()
-    let dir = await this.__get(current)
+  async activeHashes (_root) {
+    let current = _root || await this.getRoot()
+    let dir = current ? await this.__get(current) : {}
     let [tree, dirs] = await this._openTree(dir)
     // If the tree is updated while we parsed it recursively
     // try again until we don't have a transaction issue.
@@ -186,8 +189,8 @@ class AbstractContentFS {
        in tests but it is a valid concurrency concern.
     */
     /* istanbul ignore if */
-    if (current !== await this.getRoot()) return this.activeHashes()
-    let initial = dirs.concat(current).map(hash => clean(hash))
+    if (!_root && current !== await this.getRoot()) return this.activeHashes()
+    let initial = dirs.concat(current ? [current] : []).map(hash => clean(hash))
     let hashes = new Set(initial)
     let addHashes = (t = tree) => {
       Object.values(t).forEach(value => {

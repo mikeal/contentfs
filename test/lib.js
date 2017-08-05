@@ -22,6 +22,14 @@ module.exports.push((name, createLocal, createRemote) => {
     t.same(one, two)
   })
 
+  test(`${name}: basic set on empty.`, async t => {
+    t.plan(1)
+    let local = createLocal()
+    let store = contentfs(local, createRemote())
+    await store.set('/test.text', Buffer.from('asdf'))
+    t.same(await store.get('/test.text'), Buffer.from('asdf'))
+  })
+
   test(`${name}: basic hash get`, async t => {
     t.plan(1)
 
@@ -154,5 +162,13 @@ module.exports.push((name, createLocal, createRemote) => {
       t.same(e.message, 'Not Found: /test-fs.js')
       t.type(e, 'Error')
     }
+  })
+
+  test(`${name}: active hashes on empty.`, async t => {
+    t.plan(1)
+    let local = createLocal()
+    let store = contentfs(local, createRemote())
+    let activeHashes = await store.activeHashes()
+    t.same(activeHashes, [])
   })
 })
