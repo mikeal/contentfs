@@ -23,7 +23,7 @@ test('fs: test from API', async t => {
         await walk(fullpath, relative + f + '/')
       } else {
         let file = await readfile(fullpath)
-        let _file = await store.getBuffer(relative + f)
+        let _file = await store.get(relative + f)
         t.same(file, _file)
       }
     }

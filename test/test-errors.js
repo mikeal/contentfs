@@ -33,7 +33,7 @@ test(`errors: get invalid path`, async t => {
   t.plan(1)
   let store = await contentfs.from(__dirname, inmem(), inmem())
   try {
-    await store.getBuffer('/not/there.txt')
+    await store.get('/not/there.txt')
   } catch (e) {
     t.type(e, 'Error')
   }
@@ -43,35 +43,25 @@ test(`errors: get before root is set`, async t => {
   t.plan(2)
   let store = contentfs(inmem(), inmem())
   try {
-    await store.getBuffer('/testfile')
+    await store.get('/testfile')
   } catch (e) {
     t.same(e.message, 'Root has not been set.')
     t.type(e, 'Error')
   }
 })
 
-test(`errors: invalid prop promise`, async t => {
-  t.plan(2)
-  try {
-    contentfs._propromise({}, 'asdf')
-  } catch (e) {
-    t.same(e.message, `Missing property: asdf`)
-    t.type(e, 'Error')
-  }
-})
-
-test(`errors: getBuffer with dir reference`, async t => {
+test(`errors: get with dir reference`, async t => {
   t.plan(4)
   let store = await contentfs.from(__dirname, inmem(), inmem())
   try {
-    await store.getBuffer(store._root)
+    await store.get(store._root)
   } catch (e) {
     t.same(e.message, `Not Found: ${store._root}`)
     t.type(e, 'Error')
   }
 
   try {
-    await store.getBuffer('/')
+    await store.get('/')
   } catch (e) {
     t.same(e.message, `Not Found: /`)
     t.type(e, 'Error')

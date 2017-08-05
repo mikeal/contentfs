@@ -1,37 +1,28 @@
 const promisify = require('util').promisify
 
-const propPromise = (inst, prop) => {
-  if (!inst[prop]) throw new Error(`Missing property: ${prop}`)
-  return promisify((...args) => inst[prop](...args))
-}
-
 const clean = hash => {
   let i = hash.indexOf('.')
   if (i === -1) return hash
   return hash.slice(0, i)
 }
 
-class ContentFS {
+class AbstractContentFS {
   constructor (local, remote, opts) {
     this.local = local
     this.remote = remote
     this.opts = opts || {}
-    this._getLocal = propPromise(this.local, 'getBuffer')
-    this._setLocal = propPromise(this.local, 'set')
-    this._getRemote = propPromise(this.remote, 'getBuffer')
-    this._setRemote = propPromise(this.remote, 'set')
-    this._root = null
   }
   async _getRoot (store) {
-    if (!this._root) throw new Error('Root has not been set.')
-    return this.__get(this._root)
+    let _root = await this.getRoot()
+    if (!_root) throw new Error('Root has not been set.')
+    return this.__get(_root)
   }
   async __get (hash) {
     let value
     try {
-      value = await this._getLocal(clean(hash))
+      value = await this.local.get(clean(hash))
     } catch (e) {
-      value = await this._getRemote(clean(hash))
+      value = await this.remote.get(clean(hash))
     }
     if (hash.endsWith('.dir')) {
       value = JSON.parse(value.toString())
@@ -49,7 +40,7 @@ class ContentFS {
     }
     return _value
   }
-  async getBuffer (path) {
+  async get (path) {
     let value
     if (path[0] === '/') {
       value = await this._get(path)
@@ -68,15 +59,13 @@ class ContentFS {
     let value = await this._ls(path)
     return Object.keys(value)
   }
-  setRoot (root) {
-    if (!root.endsWith('.dir')) throw new Error('Cannot set root to non-directory.')
-    this._root = root
-    return this
-  }
   async _set (key, value, dir) {
     if (!key.startsWith('/')) throw new Error('Path is not valid.')
-    let hash = await this._setLocal(value)
-    if (!dir) dir = await this.__get(this._root)
+    let hash = await this.local.set(value)
+
+    let _root = await this.getRoot()
+    if (!dir) dir = await this.__get(_root)
+
     let path = key.split('/').filter(x => x)
     let _dir = dir
     while (path.length) {
@@ -117,7 +106,7 @@ class ContentFS {
         dir[key] = await this._hashDirectory(dir[key])
       }
     }
-    return await this._setLocal(Buffer.from(JSON.stringify(dir))) + '.dir'
+    return await this.local.set(Buffer.from(JSON.stringify(dir))) + '.dir'
   }
   async set (key, value) {
     if (this._pending) {
@@ -151,7 +140,7 @@ class ContentFS {
       return this._queue(all)
     }
     this._pending = []
-    let current = this._root
+    let current = await this.getRoot()
     let dir = null
     let resolves = []
     while (all.length) {
@@ -159,14 +148,15 @@ class ContentFS {
       dir = await this._set(key, value, dir)
       if (resolve) resolves.push(resolve)
     }
-    // This is a guard against internals failing or being overwritten.
-    // Can't be tested because the timing for an attack can't be predicted.
+    /* Can't find a timing attack to trigger this consistently
+       in tests but it is a valid concurrency concern.
+    */
     /* istanbul ignore if */
-    if (this._root !== current) {
+    if (await this.getRoot() !== current) {
       throw new Error('Conflict error, root updated concurrently')
     }
     let root = await this._hashDirectory(dir)
-    this.setRoot(root)
+    await this.setRoot(root, current)
     resolves.forEach(resolve => resolve(root))
     process.nextTick(() => {
       this._drain()
@@ -186,13 +176,17 @@ class ContentFS {
     }
     return [tree, dirs]
   }
-  async activeHashes () {
-    let current = this._root
+  async activeHashes (root) {
+    let current = root || await this.getRoot()
     let dir = await this.__get(current)
     let [tree, dirs] = await this._openTree(dir)
     // If the tree is updated while we parsed it recursively
     // try again until we don't have a transaction issue.
-    if (current !== this._root) return this.activeHashes()
+    /* Can't find a timing attack to trigger this consistently
+       in tests but it is a valid concurrency concern.
+    */
+    /* istanbul ignore if */
+    if (current !== await this.getRoot()) return this.activeHashes()
     let initial = dirs.concat(current).map(hash => clean(hash))
     let hashes = new Set(initial)
     let addHashes = (t = tree) => {
@@ -204,26 +198,37 @@ class ContentFS {
     addHashes()
     return [...hashes]
   }
-  async push (useBuffers = true) {
+  async push (root) {
     // TODO: smarter sync on push.
     // The current scheme parses the whole tree and pushes everything.
     // A smarter scheme would be to open the remote tree along with
     // the local tree and not extend through the tree where there are
     // no changes.
-    let root = this._root
-    let hashes = await this.activeHashes()
+    let hashes = await this.activeHashes(root)
     for (let hash of hashes) {
-      let value = await this._getLocal(hash)
-      let rhash = await this._setRemote(value)
+      let value = await this.local.get(hash)
+      let rhash = await this.remote.set(value)
       if (hash !== rhash) throw new Error('Remote hash does not match local hash.')
     }
-    return [root, hashes]
+    return hashes
   }
 }
 
-module.exports = (local, remote, opts) => new ContentFS(local, remote, opts)
+class InMemoryContentFS extends AbstractContentFS {
+  async setRoot (root, oldroot) {
+    if (!root.endsWith('.dir')) throw new Error('Cannot set root to non-directory.')
+    if (await this.getRoot() !== oldroot) {
+      throw new Error('Root does not match.')
+    }
+    this._root = root
+    return this
+  }
+  async getRoot () {
+    return this._root || null
+  }
+}
 
-module.exports._propromise = propPromise // For testing.
+module.exports = (...args) => new InMemoryContentFS(...args)
 
 if (!process.browser) {
   const fs = require('fs')
@@ -232,7 +237,6 @@ if (!process.browser) {
   const stat = promisify(fs.stat)
   const readFile = promisify(fs.readFile)
   const walk = async (dir, local, filter) => {
-    let set = propPromise(local, 'set')
     let files = await ls(dir)
     let map = {}
     for (let file of files) {
@@ -247,16 +251,18 @@ if (!process.browser) {
         if (stats.isDirectory()) {
           map[file] = await walk(fullpath, local, filter)
         } else {
-          map[file] = await set(await readFile(fullpath))
+          map[file] = await local.set(await readFile(fullpath))
         }
       }
     }
-    return await set(Buffer.from(JSON.stringify(map))) + '.dir'
+    return await local.set(Buffer.from(JSON.stringify(map))) + '.dir'
   }
 
   module.exports.from = async (directory, local, remote, filter) => {
     let root = await walk(directory, local, filter)
-    return module.exports(local, remote).setRoot(root)
+    let store = new InMemoryContentFS(local, remote)
+    await store.setRoot(root, null)
+    return store
   }
   module.exports.walk = walk
 }
