@@ -229,6 +229,7 @@ class InMemoryContentFS extends AbstractContentFS {
 }
 
 module.exports = (...args) => new InMemoryContentFS(...args)
+module.exports.AbstractContentFS = AbstractContentFS
 
 if (!process.browser) {
   const fs = require('fs')

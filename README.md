@@ -34,9 +34,8 @@ let inmem = require('lucass/inmemory')
 let localstore = inmem()
 let remotestore = inmem()
 let store = await contentfs.from(__dirname, localstore, remotestore)
-await store.set('/filename.txt', Buffer.from('asdf'))
+let rootNode = await store.set('/filename.txt', Buffer.from('asdf'))
 // local store has its tree updated and content stored, remote does not.
-let [rootNode, hashes] = await store.push()
+let hashes = await store.push()
 // remote was pushed `hashes`
-await setRemoteRootNode(rootNode) // tell remote storage to move to the new root node
 ```
