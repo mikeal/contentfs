@@ -208,6 +208,11 @@ class AbstractContentFS {
     // the local tree and not extend through the tree where there are
     // no changes.
     let hashes = await this.activeHashes(root)
+
+    if (this.remote.missing) {
+      // Remote supports the missing API.
+      hashes = await this.remote.missing(hashes)
+    }
     for (let hash of hashes) {
       let value = await this.local.get(hash)
       let rhash = await this.remote.set(value)
