@@ -18,11 +18,17 @@ class AbstractContentFS {
     return this.__get(_root)
   }
   async __get (hash) {
+    let _clean = clean(hash)
     let value
     try {
-      value = await this.local.get(clean(hash))
+      value = await this.local.get(_clean)
     } catch (e) {
-      value = await this.remote.get(clean(hash))
+      value = await this.remote.get(_clean)
+      /* Cache all remote values locally before returning */
+      let _hash = await this.local.set(value)
+      if (_hash !== _clean) {
+        throw new Error('local and remote do not consistently hash.')
+      }
     }
     if (hash.endsWith('.dir')) {
       value = JSON.parse(value.toString())

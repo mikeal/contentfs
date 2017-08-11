@@ -100,3 +100,17 @@ test(`errors: set() path that doesn't start with /`, async t => {
     t.type(e, 'Error')
   }
 })
+
+test(`errors: inconsistent hashing`, async t => {
+  let failStore = inmem(async () => 'asdf')
+  let remote = inmem()
+  let hash = await remote.set(Buffer.from('asdf'))
+  t.plan(2)
+  let store = await contentfs(failStore, remote)
+  try {
+    await store.__get(hash)
+  } catch (e) {
+    t.type(e, 'Error')
+    t.same(e.message, 'local and remote do not consistently hash.')
+  }
+})
