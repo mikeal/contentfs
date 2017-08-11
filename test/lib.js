@@ -171,4 +171,12 @@ module.exports.push((name, createLocal, createRemote) => {
     let activeHashes = await store.activeHashes()
     t.same(activeHashes, [])
   })
+
+  test(`${name}: raw ls`, async t => {
+    t.plan(2)
+    let store = await contentfs.from(__dirname, createLocal(), createRemote())
+    let result = await store.ls('/', {raw: true})
+    t.type(result, 'object')
+    t.same(Object.keys(result), await store.ls('/'))
+  })
 })

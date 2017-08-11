@@ -55,8 +55,9 @@ class AbstractContentFS {
     if (Buffer.isBuffer(value)) throw new Error('Not Directory.')
     return value
   }
-  async ls (path) {
+  async ls (path, opts = {}) {
     let value = await this._ls(path)
+    if (opts.raw) return value
     return Object.keys(value)
   }
   async _set (key, value, dir) {
